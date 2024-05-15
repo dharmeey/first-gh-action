@@ -1,1 +1,1 @@
-# first-gh-action
+# first-gh-actions
