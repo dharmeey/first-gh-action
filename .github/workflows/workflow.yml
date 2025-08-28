@@ -1,0 +1,52 @@
+name: Azure Terraform Deployment
+
+on:
+  push:
+    branches:
+      - main  # Trigger the workflow when pushing to the main branch
+  pull_request:
+    branches:
+      - main  # Trigger for PR to main branch
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the code from the repository
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Set up Azure CLI and authenticate using Service Principal credentials
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # Install Terraform
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.1.5  # Adjust this to your required version
+
+      # Init Stage: Initialize Terraform working directory
+      - name: Terraform Init
+        run: terraform init
+
+      # Validate Stage: Validate Terraform configuration
+      - name: Terraform Validate
+        run: terraform validate
+
+      # Plan Stage: Generate and show an execution plan
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      # Apply Stage: Apply the changes
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+        # Use `-auto-approve` to bypass the confirmation prompt
+        # Remove `-auto-approve` if you want to manually approve the changes
+
+      # Optionally, destroy resources after apply (for testing purposes)
+      # - name: Terraform Destroy
+      #   run: terraform destroy -auto-approve
